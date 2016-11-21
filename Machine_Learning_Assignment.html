@@ -126,7 +126,7 @@ $(document).ready(function () {
 </div>
 <div id="loading-the-data" class="section level2">
 <h2>Loading the Data</h2>
-<p>We first load the taining and testing csv files into R data frames.</p>
+<p>We first load the training and testing csv files into R data frames.</p>
 <pre class="r"><code>trainingStage &lt;- read.csv(&quot;pml-training.csv&quot;)
 testingStage &lt;- read.csv(&quot;pml-testing.csv&quot;)
 dim(trainingStage)</code></pre>
@@ -134,11 +134,11 @@ dim(trainingStage)</code></pre>
 <pre class="r"><code>dim(testingStage)</code></pre>
 <pre><code>## [1]  20 160</code></pre>
 <p>A quick analysis of the training dataset shows that it has 160 variables, and 19622 rows.</p>
-<p>The testing dataset has 160 variables, and 20 rows</p>
+<p>The testing dataset has 160 variables, and 20 rows.</p>
 <div id="exploring-and-cleaning-the-data" class="section level3">
 <h3>Exploring and Cleaning the Data</h3>
 <p>In reviewing the data, and examining the 160 variables in the training set, it becomes apparent that there are many NAs and zeroes that can safely be removed.</p>
-<p>Before continuing our analysis, we are going to remove these unnecessary variables that contain little value.</p>
+<p>Before continuing our analysis, we are going to remove these unnecessary variables that contain little value for the purpose of our analysis.</p>
 <pre class="r"><code>removeCol &lt;- grepl(&quot;^X|^amplitude_|^avg_|^kurtosis_|^max_|^min_|^skewness_|^stddev_|^var_|timestamp|window&quot;, names(trainingStage))
 trainingTrimmed &lt;- trainingStage[,!removeCol]</code></pre>
 <p>We trim the unnecessary variables from the Testing set in a similar manner.</p>
@@ -146,7 +146,7 @@ trainingTrimmed &lt;- trainingStage[,!removeCol]</code></pre>
 </div>
 <div id="subdivide-training-set" class="section level3">
 <h3>Subdivide Training Set</h3>
-<p>We further subdivide the training to allow for further testing of the model fit.</p>
+<p>We further subdivide the training data to allow for further testing of the model fit.</p>
 <pre class="r"><code>set.seed(61233)
 inTrain &lt;- createDataPartition(trainingTrimmed$classe, p=0.75, list=FALSE)
 subTrainSet &lt;- trainingTrimmed[inTrain,]
@@ -154,9 +154,9 @@ subTestSet &lt;- trainingTrimmed[-inTrain,]</code></pre>
 </div>
 <div id="build-model" class="section level3">
 <h3>Build Model</h3>
-<p>Due to it’s general robustness, We build a machine Random Forest learning model to predict the manner in which the exercise was done.</p>
+<p>Due to it’s general robustness, we build a machine Random Forest learning model to predict the manner in which the exercise was done.</p>
 <pre class="r"><code>ctrlRF &lt;- trainControl(method=&quot;cv&quot;,3)
-modFit &lt;- train(classe ~ ., data=subTrainSet,method=&quot;rf&quot;, trControl=ctrlRF, ntree=200)
+modFit &lt;- train(classe ~ ., data=subTrainSet,method=&quot;rf&quot;, trControl=ctrlRF, ntree=100)
 modFit</code></pre>
 <pre><code>## Random Forest 
 ## 
@@ -170,13 +170,13 @@ modFit</code></pre>
 ## Resampling results across tuning parameters:
 ## 
 ##   mtry  Accuracy   Kappa    
-##    2    0.9881098  0.9849557
-##   29    0.9889251  0.9859881
-##   57    0.9843049  0.9801427
+##    2    0.9877021  0.9844414
+##   29    0.9885175  0.9854725
+##   57    0.9846447  0.9805725
 ## 
 ## Accuracy was used to select the optimal model using  the largest value.
 ## The final value used for the model was mtry = 29.</code></pre>
-<p>We then apply the training model to the validation set</p>
+<p>We then apply the training model to the validation set.</p>
 <pre class="r"><code>prediction &lt;- predict(modFit,subTestSet)
 confMatrix &lt;- confusionMatrix(subTestSet$classe,prediction)</code></pre>
 <pre class="r"><code>confMatrix$overall</code></pre>
@@ -189,7 +189,7 @@ confMatrix &lt;- confusionMatrix(subTestSet$classe,prediction)</code></pre>
 </div>
 <div id="apply-prediction-to-test-set" class="section level2">
 <h2>Apply Prediction to Test Set</h2>
-<p>Finally, we apply the model fit to the test data set we’ve set aside set aside test set</p>
+<p>Finally, we apply the model fit to the test data set we’ve set aside set aside test set.</p>
 <pre class="r"><code>finalPredict &lt;- predict(modFit, testingTrimmed)
 finalPredict</code></pre>
 <pre><code>##  [1] B A B A A E D B A A B C B A E E A B B B
